@@ -1,33 +1,41 @@
-
 def do_you_have_any( player_hand, card_number )
-  player_hand.select do |card| 
-    card[:number] == card_number.to_s
-  end
+  player_hand.select{ |card| card[:number] == card_number.to_s }
 end 
 
-def game_over?(deck, player_1, player_2 )
-  player_1.empty? || player_2.empty? || deck.empty?
+def game_over?( player_1, player_2 )
+  player_1.empty? || player_2.empty?
+end
+
+def check_for_books( player_hand )
+  groups = player_hand.group_by{ |card| card[:number] }
+  groups.select{|number, cards| cards.length == 4 }
+end
+
+def take_card( guesser, holder, card ) 
+  guesser.push( holder.delete( card ))
 end
 
 def round(deck, guesser, holder )
-  guess_card = guesser.shift
 
-  puts "#{guess_card[:number]}"
-  matched_cards = do_you_have_any( holder, guess_card[:number] ) 
+  guess = guesser.group_by{|card| card[:number]}.keys.shuffle.first
 
-  held_matches = do_you_have_any( guesser, guess_card[:number] ) 
+  puts "#{guess}"
+  matched_cards = do_you_have_any( holder, guess ) 
+  matched_cards.each { |card| take_card( guesser, holder, card )}
 
-  if matched_cards.any? || held_matches.any?
-    puts "Yes... #{matched_cards.length}"
-    puts "and I have... #{held_matches.length}"
-
-    matched_cards.each { |matched_card| holder.delete( matched_card ) }
-    held_matches.each { |matched_card| guesser.delete( matched_card ) }
+  if matched_cards.empty? 
+    puts "No Go Fish..."
+    guesser.push( deck.pop )
   else
-    puts "No...Go Fish"
-    new_card = deck.pop
-    guesser.push( new_card )
-    guesser.push( guess_card )
-    puts "Added a new #{new_card[:number]}, and the #{guess_card[:number]} back to your hand"
+    puts "Yes #{matched_cards.length}"
   end
+
+  books = check_for_books( guesser )
+
+  books.each do |number, cards|
+    puts "Discarding all of the #{number}"
+    guesser.delete_if{ |card| card[:number] == number }
+  end
+
+  books.keys
 end

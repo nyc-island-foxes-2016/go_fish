@@ -42,18 +42,13 @@ describe 'Go Fish' do
   describe  'game_over?' do
     let( :winner  ){ [] }
     let( :loser ){ deck.shuffle!.slice(0,5) }
-    let( :empty_deck) { [] }
 
     it 'should return true when there is a winner'  do 
-      expect( game_over?(deck, winner,loser )).to be true
-    end
-
-    it 'should return when there is an empty deck'  do 
-      expect( game_over?(empty_deck, loser, loser )).to be true
+      expect( game_over?( winner,loser )).to be true
     end
 
     it 'should return false when there is no winner'  do 
-      expect( game_over?(deck, loser, loser )).to be false
+      expect( game_over?( loser, loser )).to be false
     end
   end
 end
